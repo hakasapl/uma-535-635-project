@@ -7,6 +7,7 @@ Project files for ECE535/635 project
 * Tristan Liang - [tgliang@umass.edu](mailto:tgliang@umass.edu)
 
 ## Motivation
+For low-power and non-internet connected remote sensors, it is not always possible to synchronize time effectively. This project aims to explore an alternative which uses similar events in the environment, recorded by sensors, to synchronize clocks between sensors.
 
 ## Design Goals
 Develop a time sync protocol using timestamped sensor data from two embedded devices. The data will be received by a raspberry pi device, and the synchronization protocol will run on the raspberry pi device
@@ -18,10 +19,14 @@ Develop a time sync protocol using timestamped sensor data from two embedded dev
 ## System Blocks
 
 ## Requirements (HW/SW)
+* Raspberry PI connected to two ParosScientific barometers
 
 ## Team Member Responsibilities
+* Hakan:
+* Tristan:
 
 ## Timeline
+* Initially, we plan to write basic scripts as a proof-of-concept to verify that we can use barometers to synchronize time without an external source.
 
 ## References
 * Automated Synchronization of Driving Data Using Vibration and Steering Events
