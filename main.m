@@ -2,54 +2,59 @@
 % must be run first.
 
 clear;
-load('temp.mat');
+load('data.mat');
+
+fs = 20;
 
 % Apply DC block on values (DC block is an external function that does a
 % moving average)
-out_values(:,1) = DCblock(out_values(:,1));
-out_values(:,2) = DCblock(out_values(:,2));
+out_0_values(:,1) = DCblock(out_values(:,1));
+out_0_values(:,2) = DCblock(out_values(:,2));
+%out_0_values(:,1) = bandpass(out_values(:,1),[2 4],fs);
+%out_0_values(:,2) = bandpass(out_values(:,2),[2 4],fs);
 
 total_data = size(out_timestamps,1);
 
-start_time = datetime(2023, 3, 24, 0, 0, 0, 0);  % Adjust this based on data
-
-fs = 20;
 window_sec = 300;
-window_overlap_sec = window_sec / 2;
 window_samples = window_sec * fs;
-window_overlap_samples = window_overlap_sec * fs;
 
 offset_vec = [];
 
-start_index = find(out_timestamps(:,1) == start_time);
+start_index = window_samples;
 end_index = start_index + window_samples;
 
-while end_index < total_data
-    xcorr_input = [];
+last_xcorr = -0.45;
 
+while end_index < total_data - window_samples
     disp(start_index + "/" + total_data);
-    if start_time ~= out_timestamps(start_index,1) || start_time ~= out_timestamps(start_index,2)
-        % Break if start time doesn't match for some reason, this shouldn't
-        % happen if the data is in-tact
-        disp(out_timestamps(start_index,1))
-        disp(start_time)
-        break
-    end
 
-    for i = 1:2
-        cur_values = out_values(start_index:end_index - 1,i);
-        xcorr_input = [xcorr_input cur_values];
-    end
+    xcorr_input_1 = out_0_values(start_index:end_index - 1, 1);
+    xcorr_input_2 = out_0_values(start_index:end_index - 1, 2);
 
     % Calculate XCorrelation
-    cur_corr = xcorr(xcorr_input(:,1),xcorr_input(:,2));
+    cur_corr = xcorr(xcorr_input_1, xcorr_input_2);
     max_index = find(cur_corr==max(cur_corr));
-    offset = (max_index - window_samples + 1) / 2 / fs;
-    offset_vec = [offset_vec; offset];
+    offset = (max_index - window_samples) / fs;
+
+    if offset + (1/fs) >= last_xcorr && offset - (1/fs) <= last_xcorr
+       offset_vec = [offset_vec; offset];
+       last_xcorr = offset;
+    else
+       offset_vec = [offset_vec; last_xcorr];
+    end
 
     % Iterate
-    start_index = start_index + window_overlap_samples;
-    end_index = end_index + window_overlap_samples;
-
-    start_time = start_time + seconds(window_overlap_sec);
+    start_index = start_index + window_samples;
+    end_index = end_index + window_samples;
 end
+
+offset_vec_size = size(offset_vec, 1);
+
+% Calculate Final Drift using LinReg
+drift_coeff = polyfit(1:offset_vec_size, offset_vec, 1);
+drift_xFit = 1:offset_vec_size;
+drift_yFit = polyval(drift_coeff, drift_xFit);
+
+% Print final average drift value
+drift_calc = drift_coeff(1) / window_samples * fs * 3600;
+disp(drift_calc)
