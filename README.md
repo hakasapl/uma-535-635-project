@@ -17,13 +17,10 @@ Develop a time sync protocol using timestamped sensor data from two embedded dev
 * Estimate clock drift between participitaing devices
 
 ## System Blocks
+![paros](https://github.com/hakasapl/uma-535-635-project/assets/40907639/dac62a85-7d47-4d88-9e5b-f3c9557ac5bc)
 
 ## Requirements (HW/SW)
 * Raspberry PI connected to two ParosScientific barometers
-
-## Team Member Responsibilities
-* Hakan:
-* Tristan:
 
 ## Timeline
 * Initially, we plan to write basic scripts as a proof-of-concept to verify that we can use barometers to synchronize time without an external source.
